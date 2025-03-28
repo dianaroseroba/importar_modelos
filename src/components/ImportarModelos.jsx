@@ -9,7 +9,7 @@ const ImportarModelos = () => {
   const mountRef = useRef(null)
 
   useEffect(() => {
-    let mixers = [] // Lista de mezcladores de animación
+    let mixers = []
     const sizes = { width: window.innerWidth, height: window.innerHeight }
 
     // Crear y agregar el canvas
@@ -61,7 +61,16 @@ const ImportarModelos = () => {
     const gltfLoader = new GLTFLoader()
     gltfLoader.setDRACOLoader(dracoLoader)
 
-    // Función para cargar modelos
+    // Mapear modelos a animaciones específicas
+    const animaciones = {
+      '/models/image1/image1.glb': 0, // Animación 0
+      '/models/image2/image2.glb': 1, // Animación 1
+      '/models/image3/image3.glb': 2, // Animación 2
+      '/models/image4/image4.glb': 3, // Animación 3
+      '/models/image5/image5.glb': 4  // Animación 4
+    }
+
+    // Función para cargar modelos con animaciones diferentes
     const cargarModelo = (ruta, escala, posicion) => {
       gltfLoader.load(ruta, (gltf) => {
         const modelo = gltf.scene
@@ -69,17 +78,21 @@ const ImportarModelos = () => {
         modelo.position.set(...posicion)
         scene.add(modelo)
 
-        // Si el modelo tiene animaciones, inicializarlas
+        // Si el modelo tiene animaciones, reproducir la correspondiente
         if (gltf.animations.length > 0) {
           const mixer = new THREE.AnimationMixer(modelo)
           mixers.push(mixer)
-          const action = mixer.clipAction(gltf.animations[0])
-          action.play()
+          
+          const animIndex = animaciones[ruta] ?? 0  // Si no hay un índice definido, usar el 0
+          if (animIndex < gltf.animations.length) {
+            const action = mixer.clipAction(gltf.animations[animIndex])
+            action.play()
+          }
         }
       })
     }
 
-    // Cargar modelos con animación
+    // Cargar modelos con animaciones distintas
     cargarModelo('/models/image1/image1.glb', 2.0, [0, 0.8, 0])
     cargarModelo('/models/image2/image2.glb', 1.0, [2, 1, -2])
     cargarModelo('/models/image3/image3.glb', 1.2, [-1, 1, 1])
